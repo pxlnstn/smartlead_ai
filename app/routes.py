@@ -146,9 +146,7 @@ async def list_leads(
     Each record includes _id-compatible `id` field for Repeater binding.
     """
     try:
-        result = await db.execute(
-            select(Lead).order_by(Lead.created_at.desc())
-        )
+        result = await db.execute(select(Lead).order_by(Lead.created_at.desc()))
         leads = result.scalars().all()
 
         return LeadsListResponse(
