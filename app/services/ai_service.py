@@ -1,7 +1,7 @@
 """
 AI Service — Ino Labs Backend
 
-Strategy pattern for multiple AI providers (Groq / Google Gemini).
+Google Gemini AI Service.
 Falls back to demo mode if no API key is configured.
 
 This module knows NOTHING about HTTP, databases, or FastAPI.
@@ -10,9 +10,8 @@ It only communicates with external AI APIs.
 
 from google import genai
 from google.genai.types import Content, Part
-from groq import AsyncGroq
 
-from config import GROQ_API_KEY, GEMINI_API_KEY, AI_PROVIDER, BUSINESS_CONTEXT
+from config import GEMINI_API_KEY, BUSINESS_CONTEXT
 
 
 class AIServiceError(Exception):
@@ -21,10 +20,9 @@ class AIServiceError(Exception):
 
 
 class AIService:
-    """Async AI service with strategy pattern for multiple providers.
+    """Async AI service using Google Gemini.
 
-    Supports Groq (LLaMA) and Google Gemini. Falls back to demo mode
-    if the selected provider's API key is missing.
+    Falls back to demo mode if the API key is missing.
     """
 
     # Demo mode response when no API key is configured
@@ -35,18 +33,13 @@ class AIService:
     )
 
     def __init__(self) -> None:
-        # Initialize Groq async client
-        self._groq_client: AsyncGroq | None = None
-        if GROQ_API_KEY:
-            self._groq_client = AsyncGroq(api_key=GROQ_API_KEY)
-
         # Initialize Google Gemini client (new google-genai SDK)
         self._gemini_client: genai.Client | None = None
         if GEMINI_API_KEY:
             self._gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
     async def generate_response(self, message: str, history: list[dict] | None = None) -> str:
-        """Generate an AI response based on the configured provider.
+        """Generate an AI response using Google Gemini.
 
         Args:
             message: The user's latest message.
@@ -60,34 +53,7 @@ class AIService:
         """
         history = history or []
 
-        if AI_PROVIDER == "gemini":
-            return await self._call_gemini(message, history)
-        else:
-            return await self._call_groq(message, history)
-
-    async def _call_groq(self, message: str, history: list[dict]) -> str:
-        """Send a chat completion request to Groq (LLaMA 3.1 8B)."""
-        if not self._groq_client:
-            return self.DEMO_RESPONSE
-
-        try:
-            # Build messages: system prompt -> history -> current message
-            messages = [
-                {"role": "system", "content": BUSINESS_CONTEXT}
-            ]
-            messages.extend(history)
-            messages.append({"role": "user", "content": message})
-
-            completion = await self._groq_client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=512,
-            )
-            return completion.choices[0].message.content
-
-        except Exception as exc:
-            raise AIServiceError(f"Groq API error: {exc}") from exc
+        return await self._call_gemini(message, history)
 
     async def _call_gemini(self, message: str, history: list[dict]) -> str:
         """Send a request to Google Gemini (gemini-2.0-flash)."""

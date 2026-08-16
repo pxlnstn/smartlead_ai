@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ino-labs-api
+    env: python
+    region: frankfurt
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "uvicorn run:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "https://suustunnn.wixstudio.com"
+      - key: DEBUG
+        value: "false"

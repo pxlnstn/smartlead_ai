@@ -4,12 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- API Keys ---
-GROQ_API_KEY: str | None = os.getenv("GROQ_API_KEY")
 GEMINI_API_KEY: str | None = os.getenv("GEMINI_API_KEY")
-
-# --- AI Provider Toggle ---
-# Options: "groq" or "gemini"
-AI_PROVIDER: str = os.getenv("AI_PROVIDER", "groq")
 
 # --- Database ---
 # SQLite for dev, MySQL/PostgreSQL for production
