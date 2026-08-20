@@ -1,5 +1,5 @@
 """
-Alembic Environment Configuration — Ino Labs
+Alembic Environment Configuration — ino
 
 Supports both sync and async migrations.
 Reads DATABASE_URL from config.py (not from alembic.ini).

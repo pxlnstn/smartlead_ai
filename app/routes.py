@@ -1,5 +1,5 @@
 """
-API Routes — Ino Labs Backend
+API Routes — ino Backend
 
 Handles incoming HTTP requests, validates them via Pydantic schemas,
 and delegates to the appropriate service/database layer.
@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models import Lead
+from app.security import require_admin_api_key, require_wix_api_key
 from app.schemas import (
     ChatRequest,
     ChatResponse,
@@ -59,7 +60,10 @@ async def health_check() -> HealthResponse:
     response_model=ChatResponse,
     summary="Send a message to the AI assistant",
 )
-async def chat(request: ChatRequest) -> ChatResponse:
+async def chat(
+    request: ChatRequest,
+    _: None = Depends(require_wix_api_key),
+) -> ChatResponse:
     """Accept a user message (+optional history) and return an AI response.
 
     Called from Wix Velo via #btnSend → fetch('/api/chat', ...).
@@ -68,7 +72,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
     try:
         response_text = await ai_service.generate_response(
             message=request.message,
-            history=request.history,
+            history=[turn.model_dump() for turn in request.history],
         )
         return ChatResponse(success=True, response=response_text)
 
@@ -94,6 +98,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
 )
 async def create_contact(
     request: ContactRequest,
+    _: None = Depends(require_wix_api_key),
     db: AsyncSession = Depends(get_db),
 ) -> ContactResponse:
     """Save a new lead from the Wix contact form (#btnGetDemo).
@@ -112,7 +117,7 @@ async def create_contact(
         db.add(lead)
         await db.flush()  # get the id before commit (commit happens in get_db)
 
-        logger.info("New lead saved: id=%s, name=%s", lead.id, lead.name)
+        logger.info("New lead saved: id=%s", lead.id)
         return ContactResponse(
             success=True,
             message="Thank you! Your demo request has been received. We'll be in touch soon.",
@@ -138,11 +143,12 @@ async def create_contact(
     summary="Retrieve all collected leads",
 )
 async def list_leads(
+    _: None = Depends(require_admin_api_key),
     db: AsyncSession = Depends(get_db),
 ) -> LeadsListResponse:
     """Return every lead record for the management dashboard.
 
-    Called from Wix Velo Repeater on the admin page.
+    Called from a private Wix backend function used by the admin page.
     Each record includes _id-compatible `id` field for Repeater binding.
     """
     try:

@@ -1,5 +1,5 @@
 """
-Entry Point — Ino Labs Backend
+Entry Point — ino Backend
 
 Creates the FastAPI application via the factory pattern
 and starts the Uvicorn ASGI server.

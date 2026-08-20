@@ -1,16 +1,35 @@
 services:
   - type: web
     name: ino-labs-api
-    env: python
+    runtime: python
+    plan: free
     region: frankfurt
     buildCommand: "pip install -r requirements.txt && alembic upgrade head"
     startCommand: "uvicorn run:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: GEMINI_API_KEY
         sync: false
+      - key: GEMINI_MODEL
+        value: "gemini-3.6-flash"
+      - key: ADMIN_API_KEY
+        generateValue: true
+      - key: WIX_API_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ino-postgres
+          property: connectionString
       - key: CORS_ORIGINS
         value: "https://suustunnn.wixstudio.com"
       - key: DEBUG
         value: "false"
+
+databases:
+  - name: ino-postgres
+    plan: free
+    region: frankfurt
+    databaseName: ino
+    user: ino

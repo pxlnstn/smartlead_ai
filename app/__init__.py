@@ -1,5 +1,5 @@
 """
-Application Factory — Ino Labs Backend
+Application Factory — ino Backend
 
 Assembles all components: CORS middleware, database initialization,
 and route registration into a single FastAPI instance.
@@ -35,11 +35,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     - On startup: initialize the database (create tables if needed).
     - On shutdown: clean up resources.
     """
-    logger.info("🚀 Ino Labs API starting up...")
+    logger.info("🚀 ino API starting up...")
     await init_db()
     logger.info("✅ Database initialized.")
     yield
-    logger.info("👋 Ino Labs API shutting down.")
+    logger.info("👋 ino API shutting down.")
 
 
 def create_app() -> FastAPI:
@@ -51,8 +51,8 @@ def create_app() -> FastAPI:
         3. Include API and health routers
     """
     app = FastAPI(
-        title="Ino Labs AI API",
-        description="AI-powered sales assistant and lead collection microservice.",
+        title="ino AI API",
+        description="ino website assistant and demo lead collection service.",
         version=APP_VERSION,
         lifespan=lifespan,
         docs_url="/docs" if DEBUG else None,
@@ -64,7 +64,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=CORS_ORIGINS,
-        allow_credentials=True,
+        allow_credentials=CORS_ORIGINS != ["*"],
         allow_methods=["*"],
         allow_headers=["*"],
     )

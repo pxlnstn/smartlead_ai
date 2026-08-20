@@ -1,5 +1,5 @@
 """
-AI Service — Ino Labs Backend
+AI Service — ino Backend
 
 Google Gemini AI Service.
 Falls back to demo mode if no API key is configured.
@@ -11,7 +11,7 @@ It only communicates with external AI APIs.
 from google import genai
 from google.genai.types import Content, Part
 
-from config import GEMINI_API_KEY, BUSINESS_CONTEXT
+from config import BUSINESS_CONTEXT, GEMINI_API_KEY, GEMINI_MODEL
 
 
 class AIServiceError(Exception):
@@ -27,9 +27,8 @@ class AIService:
 
     # Demo mode response when no API key is configured
     DEMO_RESPONSE = (
-        "\U0001f680 Thanks for your interest in Ino Labs! "
-        "I'm currently running in demo mode. "
-        "Please contact our team or request a demo to experience the full AI assistant."
+        "ino asistanı şu anda demo modunda çalışıyor. "
+        "Ürün hakkında bilgi almak veya deneyimi yakından görmek için demo talebi bırakabilirsiniz."
     )
 
     def __init__(self) -> None:
@@ -56,7 +55,7 @@ class AIService:
         return await self._call_gemini(message, history)
 
     async def _call_gemini(self, message: str, history: list[dict]) -> str:
-        """Send a request to Google Gemini (gemini-2.0-flash)."""
+        """Send a request to the configured Google Gemini model."""
         if not self._gemini_client:
             return self.DEMO_RESPONSE
 
@@ -70,7 +69,7 @@ class AIService:
                 )
 
             response = await self._gemini_client.aio.models.generate_content(
-                model="gemini-2.0-flash",
+                model=GEMINI_MODEL,
                 contents=[
                     *gemini_history,
                     Content(role="user", parts=[Part(text=message)]),
@@ -81,8 +80,12 @@ class AIService:
                     "max_output_tokens": 512,
                 },
             )
+            if not response.text:
+                raise AIServiceError("Gemini returned an empty response.")
             return response.text
 
+        except AIServiceError:
+            raise
         except Exception as exc:
             raise AIServiceError(f"Gemini API error: {exc}") from exc
 
