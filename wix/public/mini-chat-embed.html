@@ -1,0 +1,97 @@
+<!--
+  Wix "HTML iframe" (Embed a Widget) elemanının kod kutusuna
+  bunun TAMAMINI yapıştırın. CSS'i istediğiniz gibi değiştirebilirsiniz;
+  <script> içindeki mantığa dokunmayın — güvenlik köprüsü orada kurulu.
+
+  Bu HTML asla API anahtarı veya Render adresi görmez. Sadece
+  window.parent.postMessage ile masterPage.js'e mesaj gönderir/alır.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body { margin: 0; height: 100%; font-family: -apple-system, Segoe UI, Arial, sans-serif; }
+  #chat-box { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; padding: 10px; }
+  #messages { flex: 1; overflow-y: auto; font-size: 13px; white-space: pre-wrap; margin-bottom: 6px; }
+  #status { font-size: 11px; color: #888; min-height: 14px; margin-bottom: 4px; }
+  #row { display: flex; gap: 6px; }
+  #msg-input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; }
+  #send-btn { padding: 8px 12px; border-radius: 8px; border: none; background: #111; color: #fff; cursor: pointer; }
+  #send-btn:disabled { opacity: 0.5; cursor: default; }
+</style>
+</head>
+<body>
+  <div id="chat-box">
+    <div id="messages"></div>
+    <div id="status"></div>
+    <div id="row">
+      <input id="msg-input" type="text" placeholder="Sorunuzu yazın..." />
+      <button id="send-btn">Gönder</button>
+    </div>
+  </div>
+
+<script>
+  let history = [];
+  let transcriptLines = [];
+  let busy = false;
+
+  const messagesEl = document.getElementById('messages');
+  const statusEl = document.getElementById('status');
+  const inputEl = document.getElementById('msg-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  function render() {
+    messagesEl.innerText = transcriptLines.join('\n\n');
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function setStatus(text) {
+    statusEl.innerText = text || '';
+  }
+
+  function send() {
+    const message = inputEl.value.trim();
+    if (!message || busy) return;
+
+    busy = true;
+    sendBtn.disabled = true;
+    transcriptLines.push('Sen: ' + message);
+    inputEl.value = '';
+    setStatus('ino düşünüyor…');
+    render();
+
+    // Never call the API directly from here — ask the Wix page (masterPage.js)
+    // to make the secured backend call on our behalf.
+    window.parent.postMessage({ type: 'ino-chat-send', message, history }, '*');
+  }
+
+  sendBtn.addEventListener('click', send);
+  inputEl.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') send();
+  });
+
+  window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (!data || data.type !== 'ino-chat-response') return;
+
+    busy = false;
+    sendBtn.disabled = false;
+
+    if (data.error) {
+      transcriptLines.push('ino: Şu anda yanıt veremiyorum. Lütfen kısa süre sonra yeniden dene.');
+      setStatus('Bağlantı kurulamadı.');
+    } else {
+      transcriptLines.push('ino: ' + data.response);
+      history = [
+        ...history,
+        { role: 'user', content: data.userMessage },
+        { role: 'assistant', content: data.response },
+      ].slice(-20);
+      setStatus('');
+    }
+    render();
+  });
+</script>
+</body>
+</html>
