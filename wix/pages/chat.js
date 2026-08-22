@@ -3,15 +3,14 @@ import { createChatController } from 'public/chat-ui';
 
 $w.onReady(() => {
   const controller = createChatController({
-    input: $w('#chatInput'),
-    sendButton: $w('#chatSendButton'),
-    messagesText: $w('#chatMessagesText'),
-    statusText: $w('#chatStatusText'),
+    input: $w('#inputMessage'),
+    sendButton: $w('#btnSend'),
+    messagesText: $w('#txtResponse'),
     sendChatMessage,
   });
 
-  $w('#chatSendButton').onClick(controller.send);
-  $w('#chatInput').onKeyPress((event) => {
+  $w('#btnSend').onClick(controller.send);
+  $w('#inputMessage').onKeyPress((event) => {
     if (event.key === 'Enter') controller.send();
   });
 });

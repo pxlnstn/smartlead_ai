@@ -9,6 +9,10 @@ export function createChatController({
   let transcript = [];
   let busy = false;
 
+  function setStatus(text) {
+    if (statusText) statusText.text = text;
+  }
+
   function render() {
     messagesText.text = transcript
       .map(({ speaker, text }) => `${speaker}: ${text}`)
@@ -21,7 +25,7 @@ export function createChatController({
 
     busy = true;
     sendButton.disable();
-    statusText.text = 'ino düşünüyor…';
+    setStatus('ino düşünüyor…');
     transcript.push({ speaker: 'Sen', text: message });
     input.value = '';
     render();
@@ -34,13 +38,13 @@ export function createChatController({
         { role: 'user', content: message },
         { role: 'assistant', content: result.response },
       ].slice(-20);
-      statusText.text = '';
+      setStatus('');
     } catch (_error) {
       transcript.push({
         speaker: 'ino',
         text: 'Şu anda yanıt veremiyorum. Lütfen kısa süre sonra yeniden dene.',
       });
-      statusText.text = 'Bağlantı kurulamadı.';
+      setStatus('Bağlantı kurulamadı.');
     } finally {
       busy = false;
       sendButton.enable();
