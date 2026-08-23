@@ -7,11 +7,31 @@ Falls back to demo mode if no API key is configured.
 This module knows NOTHING about HTTP, databases, or FastAPI.
 It only communicates with external AI APIs.
 """
-
+import re
 from google import genai
-from google.genai.types import Content, Part
+from google.genai.types import (
+    Content,
+    GenerateContentConfig,
+    Part,
+    ThinkingConfig,
+)
 
 from config import BUSINESS_CONTEXT, GEMINI_API_KEY, GEMINI_MODEL
+
+
+def clean_plain_text(text: str) -> str:
+    """Remove accidental Markdown formatting from Gemini responses."""
+    text = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        r"\1 (\2)",
+        text,
+    )
+    text = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", text)
+    text = re.sub(r"(?m)^\s*[-*+]\s+", "• ", text)
+    text = text.replace("**", "")
+    text = text.replace("__", "")
+    text = text.replace("`", "")
+    return text.strip()
 
 
 class AIServiceError(Exception):
@@ -74,15 +94,18 @@ class AIService:
                     *gemini_history,
                     Content(role="user", parts=[Part(text=message)]),
                 ],
-                config={
-                    "system_instruction": BUSINESS_CONTEXT,
-                    "temperature": 0.7,
-                    "max_output_tokens": 512,
-                },
+                config=GenerateContentConfig(
+                    system_instruction=BUSINESS_CONTEXT,
+                    temperature=0.7,
+                    max_output_tokens=2048,
+                    thinking_config=ThinkingConfig(
+                        thinking_level="low",
+                    ),
+                ),
             )
             if not response.text:
                 raise AIServiceError("Gemini returned an empty response.")
-            return response.text
+            return clean_plain_text(response.text)
 
         except AIServiceError:
             raise
