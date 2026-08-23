@@ -11,10 +11,12 @@ Usage:
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.database import init_db
 from app.routes import api_router, health_router
@@ -70,6 +72,8 @@ def create_app() -> FastAPI:
     )
 
     # --- Register Routers ---
+    static_dir = Path(__file__).resolve().parent / "static"
+    app.mount("/media", StaticFiles(directory=static_dir), name="media")
     app.include_router(health_router)
     app.include_router(api_router)
 
