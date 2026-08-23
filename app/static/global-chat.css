@@ -1,0 +1,178 @@
+.ino-global-chat {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483000;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  pointer-events: none;
+}
+
+.ino-global-chat * { box-sizing: border-box; }
+
+.ino-global-chat__toggle {
+  width: 60px;
+  height: 60px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #480248, #8b3a8b);
+  box-shadow: 0 10px 32px rgba(72, 2, 72, 0.36);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.ino-global-chat__toggle:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 14px 38px rgba(72, 2, 72, 0.44);
+}
+
+.ino-global-chat__toggle svg { width: 26px; height: 26px; fill: currentColor; }
+.ino-global-chat__toggle .ino-icon-close { display: none; }
+.ino-global-chat.is-open .ino-icon-chat { display: none; }
+.ino-global-chat.is-open .ino-icon-close { display: block; }
+
+.ino-global-chat__window {
+  width: min(380px, calc(100vw - 32px));
+  height: min(520px, calc(100vh - 112px));
+  min-height: 390px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(210, 189, 223, .72);
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #24172a;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(42, 0, 48, .25);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(14px) scale(.96);
+  transform-origin: bottom right;
+  transition: opacity .22s ease, transform .22s ease, visibility .22s;
+}
+
+.ino-global-chat.is-open .ino-global-chat__window {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.ino-global-chat__header {
+  padding: 17px 19px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff;
+  background: linear-gradient(135deg, #480248, #7b247b);
+}
+
+.ino-global-chat__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, .15);
+}
+
+.ino-global-chat__title { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.ino-global-chat__subtitle { margin-top: 3px; font-size: 11px; color: rgba(255, 255, 255, .72); }
+
+.ino-global-chat__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fbf8fc;
+}
+
+.ino-global-chat__message {
+  max-width: 84%;
+  padding: 11px 14px;
+  border-radius: 15px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ino-global-chat__message--bot {
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+  background: #f0e7f4;
+}
+
+.ino-global-chat__message--user {
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+  color: #fff;
+  background: #651165;
+}
+
+.ino-global-chat__typing {
+  display: none;
+  align-self: flex-start;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #f0e7f4;
+  color: #6f5b76;
+  font-size: 12px;
+}
+
+.ino-global-chat__typing.is-visible { display: block; }
+
+.ino-global-chat__input-row {
+  padding: 13px;
+  display: flex;
+  gap: 9px;
+  border-top: 1px solid #eadfed;
+  background: #fff;
+}
+
+.ino-global-chat__input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #ddcce3;
+  border-radius: 12px;
+  padding: 11px 13px;
+  outline: 0;
+  color: #24172a;
+  background: #fbf8fc;
+  font: inherit;
+  font-size: 13px;
+}
+
+.ino-global-chat__input:focus { border-color: #651165; }
+
+.ino-global-chat__send {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #651165;
+  cursor: pointer;
+}
+
+.ino-global-chat__send:disabled { opacity: .55; cursor: wait; }
+.ino-global-chat__send svg { width: 18px; height: 18px; fill: currentColor; }
+
+@media (max-width: 520px) {
+  .ino-global-chat { right: 16px; bottom: 16px; }
+  .ino-global-chat__window { height: min(480px, calc(100vh - 96px)); }
+  .ino-global-chat__toggle { width: 56px; height: 56px; }
+}
